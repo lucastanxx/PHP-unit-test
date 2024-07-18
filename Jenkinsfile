@@ -1,19 +1,30 @@
 pipeline {
-	agent {
-		docker {
-			image 'composer:latest'
-		}
-	}
-	stages {
-		stage('Build') {
-			steps {
-				sh 'composer install'
-			}
-		}
-		stage('Test') {
-			steps {
-                sh './vendor/bin/phpunit tests'
+    agent any
+
+    stages {
+        stage('Clone Repository') {
+            steps {
+                git 'https://github.com/lucastanxx/jenkins-phpunit-test.git'
             }
-		}
-	}
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                sh 'composer install'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                sh './vendor/bin/phpunit --configuration tests/phpunit.xml'
+            }
+        }
+    }
+
+    post {
+        always {
+            junit 'tests/phpunit.xml'
+            archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
+        }
+    }
 }
