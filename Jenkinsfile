@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git 'https://github.com/lucastanxx/PHP-unit-test.git', branch: 'main'
+                git 'https://github.com/lucastanxx/PHP-unit-test.git'
             }
         }
 
