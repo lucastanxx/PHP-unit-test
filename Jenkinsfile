@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'composer:latest'
+        }
+    }
+
     stages {
         stage('Clone Repository') {
             steps {
@@ -9,13 +14,19 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'docker run --rm -v $(pwd):/app -w /app composer install'
+                script {
+                    def workspace = pwd()
+                    sh "docker run --rm -v \"${workspace}\":/app -w /app composer install"
+                }
             }
         }
 
         stage('Test') {
             steps {
-                sh 'docker run --rm -v $(pwd):/app -w /app php:7.4-cli ./vendor/bin/phpunit --log-junit logs/unitreport.xml -c tests/phpunit.xml tests'
+                script {
+                    def workspace = pwd()
+                    sh "docker run --rm -v \"${workspace}\":/app -w /app php:7.4-cli ./vendor/bin/phpunit --log-junit logs/unitreport.xml -c tests/phpunit.xml tests"
+                }
             }
         }
     }
