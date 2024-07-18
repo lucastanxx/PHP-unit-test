@@ -1,10 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'composer:latest'
-        }
-    }
-
+    agent any
     stages {
         stage('Clone Repository') {
             steps {
@@ -14,21 +9,23 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'composer install'
+                sh 'docker run --rm -v $(pwd):/app -w /app composer install'
             }
         }
 
         stage('Test') {
             steps {
-                sh './vendor/bin/phpunit --log-junit logs/unitreport.xml -c tests/phpunit.xml tests'
+                sh 'docker run --rm -v $(pwd):/app -w /app php:7.4-cli ./vendor/bin/phpunit --log-junit logs/unitreport.xml -c tests/phpunit.xml tests'
             }
         }
     }
 
     post {
         always {
-            junit 'logs/unitreport.xml'  // Specify the path to the JUnit report
-            archiveArtifacts artifacts: 'logs/unitreport.xml', fingerprint: true
+            script {
+                junit 'logs/unitreport.xml'
+                archiveArtifacts artifacts: 'logs/unitreport.xml', fingerprint: true
+            }
         }
     }
 }
