@@ -1,30 +1,34 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'composer:latest'
+        }
+    }
 
     stages {
         stage('Clone Repository') {
             steps {
-                git 'https://github.com/lucastanxx/PHP-unit-test.git',branch: 'main'
+                git url: 'https://github.com/lucastanxx/PHP-unit-test.git', branch: 'main'
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Build') {
             steps {
                 sh 'composer install'
             }
         }
 
-        stage('Run Tests') {
+        stage('Test') {
             steps {
-                sh './vendor/bin/phpunit --configuration tests/phpunit.xml'
+                sh './vendor/bin/phpunit --log-junit logs/unitreport.xml -c tests/phpunit.xml tests'
             }
         }
     }
 
     post {
         always {
-            junit 'tests/phpunit.xml'
-            archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
+            junit 'logs/unitreport.xml'  // Specify the path to the JUnit report
+            archiveArtifacts artifacts: 'logs/unitreport.xml', fingerprint: true
         }
     }
 }
