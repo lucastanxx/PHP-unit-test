@@ -27,8 +27,10 @@ pipeline {
 
     post {
         always {
-            junit 'logs/unitreport.xml'  // Specify the path to the JUnit report
-            archiveArtifacts artifacts: 'logs/unitreport.xml', fingerprint: true
+            node {
+                junit 'logs/unitreport.xml'  // Specify the path to the JUnit report
+                archiveArtifacts artifacts: 'logs/unitreport.xml', fingerprint: true
+            }
         }
     }
 }
